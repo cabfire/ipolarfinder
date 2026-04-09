@@ -59,6 +59,9 @@ URSA_MINOR_LINES = [
     ("Pherkad", "Kochab"),
     ("Kochab", "ZetaUMi") 
 ]
+CONSTELLATIONS = {
+    "ursa_minor" : {"stars": URSA_MINOR_STARS, "lines": URSA_MINOR_LINES},
+}
 
 # Cache partagé entre le thread de prod et le serveur HTTP
 cache_lock = threading.Lock()
@@ -103,9 +106,9 @@ def star_to_xy(cx, cy, ra_h, dec_deg, lst_h, zoom_level:float):
     y = int(cy - radius_px * math.cos(angle))
     return x, y
 
-def draw_ursa_minor(frame, cx, cy, lst_h, color=(180, 180, 180), thickness:int=1, zoom_level:float=1.0):
+def draw_constellation(frame, constellation:str, cx, cy, lst_h, color=(180, 180, 180), thickness:int=1, zoom_level:float=1.0):
     points = {}
-    for name, star in URSA_MINOR_STARS.items():
+    for name, star in CONSTELLATIONS[constellation]['stars'].items():
         x, y = star_to_xy(
             cx, cy,
             star["ra"], star["dec"],
@@ -120,7 +123,7 @@ def draw_ursa_minor(frame, cx, cy, lst_h, color=(180, 180, 180), thickness:int=1
         x, y = pt
         return -50 <= x < w + 50 and -50 <= y < h + 50
 
-    for a, b in URSA_MINOR_LINES:
+    for a, b in CONSTELLATIONS[constellation]['lines']:
         p1 = points[a]
         p2 = points[b]
         if in_frame(p1) or in_frame(p2):
@@ -390,8 +393,9 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
 
     utc_now = datetime.now(timezone.utc)
     if constellation_on:
-        draw_ursa_minor(
+        draw_constellation(
             frame, 
+            "ursa_minor",
             cx, 
             cy, 
             lst(utc_now, longitude_deg), 
