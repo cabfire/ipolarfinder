@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polar Finder</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+<div class="container">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <button class="hamburger-btn" id="menuToggleBtn" onclick="toggleMenu()">☰</button>
+            <h2 class="sidebar-title">Polar Finder</h2>
+        </div>
+
+        <div class="sidebar-content">
+            <div class="control-block">
+                <button id="zoomMinusBtn" onclick="zoomMinus()">Zoom -</button>
+                <button id="zoomPlusBtn" onclick="zoomPlus()">Zoom +</button>
+            </div>
+
+            <div class="status">
+                <div>Zoom : <span id="zoomValue">1.0</span>x</div>
+                <div>Focus: <span id="focusValue">0.000</span> dpt (<span id="focusDistance">∞</span>)</div>
+            </div>
+
+            <div class="input-row">
+                <label for="longitudeInput">Longitude (°)
+                <div class="input-help">East positive,<br>West negative</div>
+                </label>
+                <input type="number" id="longitudeInput" min="-180" max="180" step="0.001" value="2.000" onchange="setLongitude()">
+            </div>
+
+            <div class="switch-row">
+                <span>Live stacking</span>
+                <label class="switch">
+                    <input type="checkbox" id="stackToggle" onchange="toggleLiveStacking()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="switch-row">
+                <span>Auto stretch</span>
+                <label class="switch">
+                    <input type="checkbox" id="stretchToggle" onchange="toggleAutoStretch()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div id="stretchControls">
+                <div class="input-row">
+                    <label for="gammaInput">Gamma</label>
+                    <input type="number" id="gammaInput" min="0.1" max="5.0" step="0.1" onchange="changeGamma()">
+                </div>
+                <span>&nbsp;</span>
+                <div class="switch-row">
+                    <span>Blackpoint rem.</span>
+                    <label class="switch">
+                        <input type="checkbox" id="blackpointToggle" onchange="toggleBlackpoint()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <span>&nbsp;</span>
+                <div class="input-row">
+                    <label for="sigmaKInput">Sigma K
+                    <div class="input-help">remove Sigma_K*Std(pict)</div>
+                    </label>
+                    <input type="number" id="sigmaKInput" min="0.0" max="10.0" step="0.1" onchange="changeSigmaK()">
+                </div>
+            </div>
+
+            <div class="switch-row">
+                <span>Night mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="nightModeToggle" onchange="toggleNightMode()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="switch-row">
+                <span>Constellation</span>
+                <label class="switch">
+                    <input type="checkbox" id="constellationToggle" onchange="toggleConstellation()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="switch-row">
+                <span>AutoExposure</span>
+                <label class="switch">
+                    <input type="checkbox" id="aeToggle" onchange="toggleAE()" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-block">
+                <label for="exposureSlider">Exposure: <span id="exposureValue">500</span> ms</label>
+                <input type="range" id="exposureSlider" min="50" max="10000" step="50" value="500" oninput="changeExposure()">
+
+                <label for="gainSlider">Gain: <span id="gainValue">8.0</span></label>
+                <input type="range" id="gainSlider" min="1.0" max="32.0" step="0.5" value="8.0" oninput="changeGain()">
+            </div>
+
+            <div class="switch-row">
+                <span>AutoFocus</span>
+                <label class="switch">
+                    <input type="checkbox" id="afToggle" onchange="toggleAF()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-block">
+                <button id="focusMinusBtn" onclick="focusMinus()">Focus -</button>
+                <button id="focusInfinityBtn" onclick="focusInfinity()">Focus ∞</button>
+                <button id="focusPlusBtn" onclick="focusPlus()">Focus +</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="image-wrapper">
+            <img id="img" src="/polaris.jpg" alt="Polar Finder">
+        </div>
+    </main>
+</div>
+
+<script src="/script.js"></script>
+</body>
+</html>
