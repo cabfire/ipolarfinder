@@ -3,7 +3,7 @@ import cv2
 import math
 import time
 import threading
-from picamera2 import Picamera2
+from picamera2 import Picamera2 # type: ignore
 from datetime import datetime, timezone
 from urllib.parse import urlparse, parse_qs
 from polaris_time import polaris_hour_angle, RA_POLARIS, DEC_POLARIS, lst
@@ -92,7 +92,7 @@ stack_lock = threading.Lock()
 stack_acc = None
 
 # TOOLS Functions 
-def star_to_xy(cx, cy, ra_h, dec_deg, lst_h, zoom_level):
+def star_to_xy(cx, cy, ra_h, dec_deg, lst_h, zoom_level:float):
     hour_angle_h = (lst_h - ra_h) % 24.0
     angle = 2.0 * math.pi * (hour_angle_h / 24.0)
 
@@ -103,7 +103,7 @@ def star_to_xy(cx, cy, ra_h, dec_deg, lst_h, zoom_level):
     y = int(cy - radius_px * math.cos(angle))
     return x, y
 
-def draw_ursa_minor(frame, cx, cy, lst_h, color=(180, 180, 180), thickness=1,zoom_level=1):
+def draw_ursa_minor(frame, cx, cy, lst_h, color=(180, 180, 180), thickness:int=1, zoom_level:float=1.0):
     points = {}
     for name, star in URSA_MINOR_STARS.items():
         x, y = star_to_xy(
