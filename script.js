@@ -18,6 +18,7 @@ let autoExposure = true;
 let exposureMs = 500;
 let gainValue = 8.0;
 let liveStackingEnabled = true;
+let liveStackingAlpha = 0.8;
 let autoStretchEnabled = false;
 let blackpointRemovalEnabled = true;
 let stretchGamma = 2.2;
@@ -28,6 +29,15 @@ function toggleLiveStacking() {
     liveStackingEnabled = document.getElementById("stackToggle").checked;
     updateProcessingUI();
     sendProcessingConfig();
+}
+
+function changeStackAlpha() {
+    const value = parseFloat(document.getElementById("stackAlphaSlider").value);
+    if (!Number.isNaN(value)) {
+        liveStackingAlpha = Math.max(0.1, Math.min(0.99, value));
+        updateProcessingUI();
+        sendProcessingConfig();
+    }
 }
 
 function toggleAutoStretch() {
@@ -155,6 +165,9 @@ function updateButtons() {
 
 function updateProcessingUI() {
     document.getElementById("stackToggle").checked = liveStackingEnabled;
+    document.getElementById("stackAlphaSlider").value = liveStackingAlpha.toFixed(2);
+    document.getElementById("stackAlphaValue").textContent = liveStackingAlpha.toFixed(2);
+    document.getElementById("stackAlphaSlider").disabled = !liveStackingEnabled;
     document.getElementById("stretchToggle").checked = autoStretchEnabled;
     document.getElementById("blackpointToggle").checked = blackpointRemovalEnabled;
     document.getElementById("constellationToggle").checked = constellationEnabled;
@@ -273,6 +286,7 @@ function sendProcessingConfig() {
     const url =
         "/set_processing"
         + "?stack=" + (liveStackingEnabled ? "1" : "0")
+        + "&stack_alpha=" + encodeURIComponent(liveStackingAlpha.toFixed(2))
         + "&stretch=" + (autoStretchEnabled ? "1" : "0")
         + "&blackpoint=" + (blackpointRemovalEnabled ? "1" : "0")
         + "&constellation=" + (constellationEnabled ? "1" : "0")
@@ -307,6 +321,7 @@ async function loadServerConfig() {
         longitudeDeg = cfg.longitude_deg;
         zoom = cfg.zoom_level;
         liveStackingEnabled = cfg.live_stacking_enabled ?? true;
+        liveStackingAlpha = cfg.live_stacking_alpha ?? 0.8;
         autoStretchEnabled = cfg.auto_stretch_enabled ?? false;
         blackpointRemovalEnabled = cfg.blackpoint_removal_enabled ?? true;
         stretchGamma = cfg.stretch_gamma ?? 2.2;

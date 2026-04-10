@@ -84,6 +84,7 @@ analogue_gain = 8.0
 zoom_level = 1
 last_controls = None
 live_stacking_enabled = False
+live_stacking_alpha = 0.8
 auto_stretch_enabled = False
 blackpoint_removal_enabled = True
 stretch_gamma = 2.2
@@ -152,6 +153,7 @@ def save_settings():
                 "longitude_deg": longitude_deg,
                 "zoom_level": zoom_level,
                 "live_stacking_enabled": live_stacking_enabled,
+                "live_stacking_alpha": live_stacking_alpha,
                 "auto_stretch_enabled": auto_stretch_enabled,
                 "blackpoint_removal_enabled": blackpoint_removal_enabled,
                 "stretch_gamma": stretch_gamma,
@@ -176,6 +178,7 @@ def load_settings():
     global longitude_deg
     global zoom_level
     global live_stacking_enabled
+    global live_stacking_alpha
     global auto_stretch_enabled
     global blackpoint_removal_enabled
     global stretch_gamma
@@ -199,6 +202,7 @@ def load_settings():
             longitude_deg = float(data.get("longitude_deg", 2.0))
             zoom_level = float(data.get("zoom_level", 1.0))
             live_stacking_enabled = bool(data.get("live_stacking_enabled", True))
+            live_stacking_alpha = max(0.1, min(0.99, float(data.get("live_stacking_alpha", 0.8))))
             auto_stretch_enabled = bool(data.get("auto_stretch_enabled", False))
             blackpoint_removal_enabled = bool(data.get("blackpoint_removal_enabled", True))
             stretch_gamma = float(data.get("stretch_gamma", 2.2))
@@ -541,6 +545,7 @@ def producer_loop():
             zoom = zoom_level
             ae = auto_exposure_enabled
             stacking_on = live_stacking_enabled
+            stacking_alpha = live_stacking_alpha
             stretch_on = auto_stretch_enabled
             blackpoint_on = blackpoint_removal_enabled
             gamma = stretch_gamma
@@ -569,7 +574,7 @@ def producer_loop():
             frame = cv2.flip(frame, -1)
             # live stacking
             if stacking_on:
-                frame = live_stack(frame, alpha=0.8)
+                frame = live_stack(frame, alpha=stacking_alpha)
             else:
                 reset_live_stack()
             # stretch data
@@ -844,6 +849,7 @@ class Handler(BaseHTTPRequestHandler):
                 with param_lock:
                     global live_stacking_enabled
                     global auto_stretch_enabled
+                    global live_stacking_alpha
                     global blackpoint_removal_enabled
                     global stretch_gamma
                     global stretch_sigma_k
@@ -854,6 +860,9 @@ class Handler(BaseHTTPRequestHandler):
 
                     if "stretch" in params:
                         auto_stretch_enabled = params["stretch"][0] == "1"
+
+                    if "stack_alpha" in params:
+                        live_stacking_alpha = max(0.1, min(0.99, float(params["stack_alpha"][0])))
 
                     if "blackpoint" in params:
                         blackpoint_removal_enabled = params["blackpoint"][0] == "1"
@@ -937,6 +946,7 @@ class Handler(BaseHTTPRequestHandler):
                     "longitude_deg": longitude_deg,
                     "zoom_level": zoom_level,
                     "live_stacking_enabled": live_stacking_enabled,
+                    "live_stacking_alpha": live_stacking_alpha,
                     "auto_stretch_enabled": auto_stretch_enabled,
                     "blackpoint_removal_enabled": blackpoint_removal_enabled,
                     "stretch_gamma": stretch_gamma,
