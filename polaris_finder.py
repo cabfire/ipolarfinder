@@ -6,7 +6,7 @@ import threading
 from picamera2 import Picamera2 # type: ignore
 from datetime import datetime, timezone
 from urllib.parse import urlparse, parse_qs
-from polaris_time import polaris_hour_angle, RA_POLARIS, DEC_POLARIS, lst
+from polaris_time import polaris_hour_angle, RA_POLARIS, DEC_POLARIS, lst, dec_to_time
 import json
 import os
 import logging
@@ -403,11 +403,10 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
             thickness=OVERLAY_THICKNESS,
             zoom_level=zoom)
 
-    # Write date/time UTC and Polaris hour
+    # Write UTC date/time and Polaris time
     utc_text = utc_now.strftime("%Y-%m-%d %H:%M:%S UTC")
-    h = int(polaris_hour)
-    m = int((polaris_hour - h) * 60)
-    utc_text += f" - Polaris: {h:02d}:{m:02d}"
+    h, m, s = dec_to_time(polaris_hour)
+    utc_text += f" - Polaris: {h:02d}:{m:02d}:{s:02d}"
 
     (font_w, font_h), _ = cv2.getTextSize(
         utc_text, cv2.FONT_HERSHEY_SIMPLEX, 1, 2

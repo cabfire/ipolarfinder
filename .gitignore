@@ -1,0 +1,15 @@
+# Dossiers
+node_modules/
+venv/
+dist/
+build/
+__pycache__/
+
+# Fichiers
+.env
+*.log
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db

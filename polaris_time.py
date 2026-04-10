@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import math
 
-RA_POLARIS = 3.072      #  RA Polaris JNOW - voir autre valeur de 2.9970 ?
+RA_POLARIS = 3.072      #  RA Polaris JNOW
 DEC_POLARIS = 89.3770   # DEC Polaris JNOW
 
 def julian_date(dt):
@@ -54,18 +54,29 @@ def polaris_hour_angle(dt_utc, longitude_deg):
     return hour
 
 
+def dec_to_time(dec_hour):
+    h = int(dec_hour)
+    m = int((dec_hour - h) * 60)
+    s = int((((dec_hour - h) * 60) - m) * 60)
+    return h, m, s
+
+
 # =========================
-# Exemple d'utilisation
+# usage example
 # =========================
 if __name__ == "__main__":
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).replace(microsecond=0)
 
-    # Exemple : France (~2° Est)
-    longitude = 2.532330
+    # Example : France Paris
+    longitude = 2.33333
+
+    print(f"utc datetime       : {now}")
+    print(f"julian date        : {julian_date(now)}")
+
+    lst_hour = lst(now, longitude)
+    h, m , s = dec_to_time(lst_hour)
+    print(f"local sideral time : {h:02d}:{m:02d}:{s:02d} ({lst_hour:.4f} h)")
 
     polaris_hour = polaris_hour_angle(now, longitude)
-
-    h = int(polaris_hour)
-    m = int((polaris_hour - h) * 60)
-
-    print(f"Heure Polaris : {h:02d}h{m:02d} ({polaris_hour:.2f} h)")
+    h, m , s = dec_to_time(polaris_hour)
+    print(f"Polaris time       : {h:02d}:{m:02d}:{s:02d} ({polaris_hour:.4f} h)")
