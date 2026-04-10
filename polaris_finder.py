@@ -6,7 +6,8 @@ import threading
 from picamera2 import Picamera2 # type: ignore
 from datetime import datetime, timezone
 from urllib.parse import urlparse, parse_qs
-from polaris_time import polaris_hour_angle, RA_POLARIS, DEC_POLARIS, lst, dec_to_time
+from polaris_time import polaris_hour_angle, DEC_POLARIS, lst, dec_to_time
+from constellations import CONSTELLATIONS
 import json
 import os
 import logging
@@ -40,28 +41,6 @@ POLARIS_OFFSET_PX = (3600 * (90 - DEC_POLARIS)) / (206 * PIXEL_SIZE / CAM_FOCAL)
 # Zooms supportés
 ZOOM_LEVELS = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
 JPEG_QUALITY = 90
-
-URSA_MINOR_STARS = {
-    "Polaris":  {"ra": RA_POLARIS, "dec": DEC_POLARIS},
-    "Yildun":   {"ra": 17.4006, "dec": 86.5592},
-    "EpsUMi":   {"ra": 16.7247, "dec": 81.9833},
-    "ZetaUMi":  {"ra": 15.7214, "dec": 77.7067},
-    "EtaUMi":   {"ra": 16.2808, "dec": 75.6872},
-    "Pherkad":  {"ra": 16.3464, "dec": 71.7350},
-    "Kochab":   {"ra": 14.8458, "dec": 74.0433},
-}   # JNOW Postions
-URSA_MINOR_LINES = [ 
-    ("Polaris", "Yildun"), 
-    ("Yildun", "EpsUMi"), 
-    ("EpsUMi", "ZetaUMi"), 
-    ("ZetaUMi", "EtaUMi"), 
-    ("EtaUMi", "Pherkad"), 
-    ("Pherkad", "Kochab"),
-    ("Kochab", "ZetaUMi") 
-]
-CONSTELLATIONS = {
-    "ursa_minor" : {"stars": URSA_MINOR_STARS, "lines": URSA_MINOR_LINES},
-}
 
 # Cache partagé entre le thread de prod et le serveur HTTP
 cache_lock = threading.Lock()
