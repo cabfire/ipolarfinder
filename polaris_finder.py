@@ -234,46 +234,46 @@ def normalize_zoom(value: float) -> float:
     value = max(min(ZOOM_LEVELS), min(max(ZOOM_LEVELS), value))
     return round(value * 2) / 2.0
 
-
 def draw_polar_clock(frame, cx, cy, radius,
                      color=(0, 255, 0),
                      thickness=1,
                      num_ticks=60,
+                     zoom=1.0,
                      rotation_deg=0,
                      polaris_hour=0):
     # Draw clock circle
     cv2.circle(frame, (cx, cy), radius, color, thickness)
 
     base_thickness = thickness
+    if zoom>=2:
+        for i in range(num_ticks):
+            angle_deg = (360.0 * i / num_ticks) + rotation_deg
+            angle_rad = math.radians(angle_deg - 90)
 
-    for i in range(num_ticks):
-        angle_deg = (360.0 * i / num_ticks) + rotation_deg
-        angle_rad = math.radians(angle_deg - 90)
+            ticks_per_quarter = num_ticks // 4
+            ticks_per_30deg = num_ticks // 12
 
-        ticks_per_quarter = num_ticks // 4
-        ticks_per_30deg = num_ticks // 12
+            is_very_major = (i % ticks_per_quarter == 0)
+            is_major = (i % ticks_per_30deg == 0)
 
-        is_very_major = (i % ticks_per_quarter == 0)
-        is_major = (i % ticks_per_30deg == 0)
+            if is_very_major:
+                tick_len = TICK_LEN * 3
+                tick_thickness = base_thickness + 2
+            elif is_major:
+                tick_len = TICK_LEN * 2
+                tick_thickness = base_thickness + 1
+            else:
+                tick_len = TICK_LEN
+                tick_thickness = base_thickness
 
-        if is_very_major:
-            tick_len = TICK_LEN * 3
-            tick_thickness = base_thickness + 2
-        elif is_major:
-            tick_len = TICK_LEN * 2
-            tick_thickness = base_thickness + 1
-        else:
-            tick_len = TICK_LEN
-            tick_thickness = base_thickness
+            x1 = int(cx + (radius - tick_len) * math.cos(angle_rad))
+            y1 = int(cy + (radius - tick_len) * math.sin(angle_rad))
+            x2 = int(cx + radius * math.cos(angle_rad))
+            y2 = int(cy + radius * math.sin(angle_rad))
 
-        x1 = int(cx + (radius - tick_len) * math.cos(angle_rad))
-        y1 = int(cy + (radius - tick_len) * math.sin(angle_rad))
-        x2 = int(cx + radius * math.cos(angle_rad))
-        y2 = int(cy + radius * math.sin(angle_rad))
+            cv2.line(frame, (x1, y1), (x2, y2), color, tick_thickness)
 
-        cv2.line(frame, (x1, y1), (x2, y2), color, tick_thickness)
-
-    # Draw Polaris
+    # Draw Polaris circle
     angle = 2 * math.pi * (polaris_hour / 24.0)
     x_polaris = int(cx - radius * math.sin(angle))
     y_polaris = int(cy - radius * math.cos(angle))
@@ -371,6 +371,7 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
         color=overlay_color,
         thickness=OVERLAY_THICKNESS,
         num_ticks=NUM_TICKS,
+        zoom=zoom_level,
         rotation_deg=0,
         polaris_hour=polaris_hour
     )
