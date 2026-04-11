@@ -965,7 +965,7 @@ picam2 = Picamera2()
 config = picam2.create_preview_configuration(
     main={"size": (WIDTH, HEIGHT), "format": "RGB888"},
     queue=False,
-    buffer_count=1
+    buffer_count=3
 )
 picam2.configure(config)
 picam2.start()
