@@ -156,6 +156,8 @@ function updateLongitudeLabel() {
 function updateButtons() {
     document.getElementById("zoomMinusBtn").disabled = (zoom <= MIN_ZOOM);
     document.getElementById("zoomPlusBtn").disabled = (zoom >= MAX_ZOOM);
+    document.getElementById("zoomMinBtn").disabled = (zoom <= MIN_ZOOM);
+    document.getElementById("zoomMaxBtn").disabled = (zoom >= MAX_ZOOM);
 
     const focusDisabled = autofocus;
     document.getElementById("focusMinusBtn").disabled = focusDisabled || focusValue <= MIN_FOCUS;
@@ -210,6 +212,24 @@ function zoomPlus() {
 
 function zoomMinus() {
     zoom = clampZoom(zoom - ZOOM_STEP);
+    updateUI();
+
+    fetch("/set_zoom?zoom=" + zoom)
+        .then(() => refreshImage())
+        .catch(() => {});
+}
+
+function zoomMin() {
+    zoom = MIN_ZOOM;
+    updateUI();
+
+    fetch("/set_zoom?zoom=" + zoom)
+        .then(() => refreshImage())
+        .catch(() => {});
+}
+
+function zoomMax() {
+    zoom = MAX_ZOOM;
     updateUI();
 
     fetch("/set_zoom?zoom=" + zoom)
