@@ -32,7 +32,7 @@ CAMELOPARDALIS_LINES = [
     ("E634", "yCam"), 
     ("yCam", "aCam"), 
     ("aCam", "HP18505"), 
-    ("HP18505", "E385"), 
+    ("HIP18505", "E385"), 
     ("E385", "yCam") 
 ]
 
