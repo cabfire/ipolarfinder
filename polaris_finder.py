@@ -26,22 +26,21 @@ SETTINGS_FILE = "settings.json"
 # Modes: 'SRGGB10_CSI2P' : 1536x864  [120.13 fps - (768, 432)/3072x1728 crop]
 #                          2304x1296 [ 56.03 fps - (0, 0)/4608x2592 crop]
 #                          4608x2592 [ 14.35 fps - (0, 0)/4608x2592 crop]
-WIDTH = 2304
-HEIGHT = 1296
-FPS = 56
+WIDTH = 1920
+HEIGHT = 1080
+FPS = 60
 CAM_FOCAL = 4.74
 SENSOR_WIDTH = 6.45
 SENSOR_HEIGHT = 3.63
-PIXEL_SIZE = SENSOR_WIDTH / WIDTH * 1000
+PIXEL_SIZE = (SENSOR_WIDTH / WIDTH + SENSOR_HEIGHT / HEIGHT) / 2 * 1000
 OVERLAY_COLOR = (0, 255, 0)
 OVERLAY_COLOR_NIGHT = (0, 0, 255)
 OVERLAY_THICKNESS = 1
 NUM_TICKS = 72
 TICK_LEN = 6
-POLARIS_OFFSET_PX = (3600 * (90 - DEC_POLARIS)) / (206 * PIXEL_SIZE / CAM_FOCAL)  # 41px = (3600 * 0.7°) / (206 * 1.40um / 4.74mm)
-
+POLARIS_OFFSET_PX = (3600 * (90 - DEC_POLARIS)) / (206 * PIXEL_SIZE / CAM_FOCAL)
 # Zooms supportés
-ZOOM_LEVELS = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+ZOOM_LEVELS = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 JPEG_QUALITY = 90
 
 # Cache partagé entre le thread de prod et le serveur HTTP
@@ -479,14 +478,14 @@ def live_stack(frame, alpha=0.8):
 def generate_histogram_image(frame, width=256, height=150):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # calcul histogramme
+    # histogram calculation
     hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
     hist = hist.flatten()
 
-    # normalisation pour affichage
+    # display normalisation
     hist = hist / hist.max()
 
-    # image noire
+    # black image
     hist_img = np.zeros((height, width, 3), dtype=np.uint8)
 
     for x in range(256):
@@ -497,7 +496,7 @@ def generate_histogram_image(frame, width=256, height=150):
     bp = int(np.clip(np.mean(gray), 0, 255))
     cv2.line(hist_img, (bp, 0), (bp, height), (0, 0, 255), 1)
 
-    # Petit texte valeur BlackPoint
+    # BlackPoint value
     cv2.putText(
         hist_img,
         f"{bp}",
@@ -513,9 +512,9 @@ def generate_histogram_image(frame, width=256, height=150):
 
 def producer_loop():
     """
-    Thread de fond:
-    - capture une image par seconde au mode expo auto sinon temps d'expo
-    - prépare le JPEG avec les paramètres demandés : Zoom, AF, AE, overlay clock+polaris, night mode
+    Main loop thread:
+    - captures one image per second in auto exposure mode, otherwise uses exposure time
+    - prepares the JPEG with the requested settings: Zoom, AF, AE, overlay clock + polaris, night mode, ...
     """
     global jpeg_cache, last_generated_utc, auto_stretch, live_stacking
 

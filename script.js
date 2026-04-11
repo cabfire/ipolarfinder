@@ -1,5 +1,5 @@
 const MIN_ZOOM = 1.0;
-const MAX_ZOOM = 4.0;
+const MAX_ZOOM = 5.0;
 const ZOOM_STEP = 0.5;
 const FOCUS_STEP = 0.0125;
 const MIN_FOCUS = 0.0;
@@ -34,7 +34,7 @@ function toggleLiveStacking() {
 function changeStackAlpha() {
     const value = parseFloat(document.getElementById("stackAlphaSlider").value);
     if (!Number.isNaN(value)) {
-        liveStackingAlpha = Math.max(0.1, Math.min(0.99, value));
+        liveStackingAlpha = Math.max(0.1, Math.min(0.95, value));
         updateProcessingUI();
         sendProcessingConfig();
     }
