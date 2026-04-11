@@ -26,9 +26,9 @@ SETTINGS_FILE = "settings.json"
 # Modes: 'SRGGB10_CSI2P' : 1536x864  [120.13 fps - (768, 432)/3072x1728 crop]
 #                          2304x1296 [ 56.03 fps - (0, 0)/4608x2592 crop]
 #                          4608x2592 [ 14.35 fps - (0, 0)/4608x2592 crop]
-WIDTH = 1536
-HEIGHT = 864
-FPS = 120
+WIDTH = 2304
+HEIGHT = 1296
+FPS = 56
 CAM_FOCAL = 4.74
 SENSOR_WIDTH = 6.45
 SENSOR_HEIGHT = 3.63
