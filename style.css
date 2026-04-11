@@ -112,6 +112,12 @@ body.menu-collapsed .sidebar-content {
     gap: 10px;
 }
 
+.zoom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
 .status {
     font-size: 18px;
     line-height: 1.5;
