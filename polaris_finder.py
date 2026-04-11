@@ -500,7 +500,7 @@ def generate_histogram_image(frame, width=256, height=150):
     cv2.putText(
         hist_img,
         f"{bp}",
-        (bp + 3, 14),
+        (bp + 5, 18),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.7,
         (0, 0, 255),
