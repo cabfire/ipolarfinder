@@ -7,7 +7,7 @@ URSA_MINOR_STARS = {
     "EpsUMi":   {"ra": 16.7247, "dec": 81.9833},
     "ZetaUMi":  {"ra": 15.7214, "dec": 77.7067},
     "EtaUMi":   {"ra": 16.2808, "dec": 75.6872},
-    "Pherkad":  {"ra": 16.3464, "dec": 71.7350},
+    "Pherkad":  {"ra": 15.3464, "dec": 71.7353},
     "Kochab":   {"ra": 14.8458, "dec": 74.0433},
 }
 

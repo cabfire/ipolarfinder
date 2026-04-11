@@ -30,7 +30,9 @@ WIDTH = 1536
 HEIGHT = 864
 FPS = 120
 CAM_FOCAL = 4.74
-PIXEL_SIZE = 1.40
+SENSOR_WIDTH = 6.45
+SENSOR_HEIGHT = 3.63
+PIXEL_SIZE = SENSOR_WIDTH / WIDTH * 1000
 OVERLAY_COLOR = (0, 255, 0)
 OVERLAY_COLOR_NIGHT = (0, 0, 255)
 OVERLAY_THICKNESS = 1
@@ -335,9 +337,9 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
         frame = cv2.resize(cropped, (w, h), interpolation=cv2.INTER_LINEAR)
 
         cx, cy = w // 2, h // 2
-    
+
     # draw histogram lower left corner
-    hist_img = generate_histogram_image(frame, width=256, height=120)
+    hist_img = generate_histogram_image(frame, width=512, height=240)
 
     hist_h, hist_w = hist_img.shape[:2]
     frame_h, frame_w = frame.shape[:2]
@@ -361,7 +363,7 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
     cv2.line(frame, (cx, 0), (cx, h), overlay_color, OVERLAY_THICKNESS)
 
     # Draw polar circle
-    polaris_radius = round(POLARIS_OFFSET_PX * zoom, 0)
+    polaris_radius = int(round(POLARIS_OFFSET_PX * zoom, 0))
     draw_polar_clock(
         frame,
         cx,
@@ -377,17 +379,17 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
     utc_now = datetime.now(timezone.utc)
     if constellation_on:
         draw_constellation(
-            frame, 
+            frame,
             "ursa_minor",
-            cx, 
-            cy, 
-            lst(utc_now, longitude_deg), 
-            color=overlay_color, 
+            cx,
+            cy,
+            lst(utc_now, longitude_deg),
+            color=overlay_color,
             thickness=OVERLAY_THICKNESS,
             zoom_level=zoom)
 
     # Write UTC date/time and Polaris time
-    utc_text = utc_now.strftime("%Y-%m-%d %H:%M:%S UTC")
+    utc_text = f' W: {(w/zoom):.0f} X H: {(h/zoom):.0f} - {utc_now.strftime("%Y-%m-%d %H:%M:%S UTC")}'
     h, m, s = dec_to_time(polaris_hour)
     utc_text += f" - Polaris: {h:02d}:{m:02d}:{s:02d}"
 
