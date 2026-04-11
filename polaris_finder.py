@@ -479,28 +479,43 @@ def generate_histogram_image(frame, width=256, height=150):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # histogram calculation
-    hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
-    hist = hist.flatten()
+    hist = cv2.calcHist([gray], [0], None, [256], [0, 256]).flatten()
 
     # display normalisation
-    hist = hist / hist.max()
+    hist = hist / max(hist.max(), 1)
 
     # black image
     hist_img = np.zeros((height, width, 3), dtype=np.uint8)
 
-    for x in range(256):
-        h = int(hist[x] * height)
-        cv2.line(hist_img, (x, height), (x, height - h), (255, 255, 255))
+    # projection des bins sur toute la largeur
+    for i in range(256):
+        x1 = int(i * width / 256.0)
+        x2 = int((i + 1) * width / 256.0)
 
-    # add line for mean BlackPoint
+        h = int(hist[i] * height)
+
+        if x2 <= x1:
+            x2 = x1 + 1
+
+        cv2.rectangle(
+            hist_img,
+            (x1, height),
+            (x2 - 1, height - h),
+            (255, 255, 255),
+            -1
+        )
+
+    # BlackPoint (mean)
     bp = int(np.clip(np.mean(gray), 0, 255))
-    cv2.line(hist_img, (bp, 0), (bp, height), (0, 0, 255), 1)
+    x_bp = int(bp * width / 256.0)
 
-    # BlackPoint value
+    cv2.line(hist_img, (x_bp, 0), (x_bp, height), (0, 0, 255), 1)
+
+    # texte
     cv2.putText(
         hist_img,
         f"{bp}",
-        (bp + 5, 18),
+        (x_bp + 5, 18),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.7,
         (0, 0, 255),
