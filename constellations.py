@@ -31,7 +31,7 @@ URSA_MINOR_LINES = [
 CAMELOPARDALIS_LINES = [
     ("E634", "yCam"), 
     ("yCam", "aCam"), 
-    ("aCam", "HP18505"), 
+    ("aCam", "HIP18505"), 
     ("HIP18505", "E385"), 
     ("E385", "yCam") 
 ]
