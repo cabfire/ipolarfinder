@@ -296,7 +296,7 @@ def draw_polar_clock(frame, cx, cy, radius,
 
         # épaisseur fixe pour les labels
         (tw, th), _ = cv2.getTextSize(
-            text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1
+            text, cv2.FONT_HERSHEY_SIMPLEX, 0.8, 1
         )
         org = (tx - tw // 2, ty + th // 2)
 
@@ -305,7 +305,7 @@ def draw_polar_clock(frame, cx, cy, radius,
             text,
             org,
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
+            0.8,
             color,
             thickness,
             cv2.LINE_AA
@@ -502,7 +502,7 @@ def generate_histogram_image(frame, width=256, height=150):
         f"{bp}",
         (bp + 3, 14),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.5,
+        0.7,
         (0, 0, 255),
         1,
         cv2.LINE_AA
