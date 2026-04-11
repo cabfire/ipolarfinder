@@ -53,7 +53,7 @@ Typical setup:
 ├── index.html           # Web UI markup
 ├── script.js            # Front-end logic + calls to backend endpoints
 ├── style.css            # UI styles (normal + night mode)
-├── test.py              # Small local script using polaris_time functions
+├── test.py              # Small local script to make tests on function
 └── favicon.ico          # Browser icon
 ```
 

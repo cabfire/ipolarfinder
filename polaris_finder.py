@@ -378,15 +378,17 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
 
     utc_now = datetime.now(timezone.utc)
     if constellation_on:
-        draw_constellation(
-            frame,
-            "ursa_minor",
-            cx,
-            cy,
-            lst(utc_now, longitude_deg),
-            color=overlay_color,
-            thickness=OVERLAY_THICKNESS,
-            zoom_level=zoom)
+        lst_h = lst(utc_now, longitude_deg)
+        for constellation in CONSTELLATIONS.keys():
+            draw_constellation(
+                frame,
+                constellation,
+                cx,
+                cy,
+                lst_h,
+                color=overlay_color,
+                thickness=OVERLAY_THICKNESS,
+                zoom_level=zoom)
 
     # Write UTC date/time and Polaris time
     utc_text = f' W: {(w/zoom):.0f} X H: {(h/zoom):.0f} - {utc_now.strftime("%Y-%m-%d %H:%M:%S UTC")}'
