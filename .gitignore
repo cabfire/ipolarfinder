@@ -6,6 +6,7 @@ build/
 __pycache__/
 
 # Fichiers
+settings.json
 .env
 *.log
 *.tmp
