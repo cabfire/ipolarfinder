@@ -70,6 +70,7 @@ blackpoint_removal_enabled = True
 stretch_gamma = 2.2
 stretch_sigma_k = 1.8
 constellation_enabled = True
+histogram_enabled = True
 
 # live stacking
 stack_lock = threading.Lock()
@@ -139,6 +140,7 @@ def save_settings():
                 "stretch_gamma": stretch_gamma,
                 "stretch_sigma_k": stretch_sigma_k,
                 "constellation_enabled": constellation_enabled,
+                "histogram_enabled": histogram_enabled,
             }
 
         tmp_file = f"{SETTINGS_FILE}.{threading.get_ident()}.tmp"
@@ -164,6 +166,7 @@ def load_settings():
     global stretch_gamma
     global stretch_sigma_k
     global constellation_enabled
+    global histogram_enabled
 
     if not os.path.exists(SETTINGS_FILE):
         return
@@ -188,6 +191,7 @@ def load_settings():
             stretch_gamma = float(data.get("stretch_gamma", 2.2))
             stretch_sigma_k = float(data.get("stretch_sigma_k", 1.8))
             constellation_enabled = bool(data.get("constellation_enabled", True))
+            histogram_enabled = bool(data.get("histogram_enabled", True))
 
     except Exception as e:
         log.error(f"Erreur chargement settings: {e}")
@@ -312,7 +316,7 @@ def draw_polar_clock(frame, cx, cy, radius,
         )
 
 
-def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour=0, constellation_on=True):
+def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour=0, constellation_on=True, histogram_on=True):
     """
     Rend une image finale pour un zoom donné à partir d'une image source déjà capturée.
     """
@@ -337,25 +341,26 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
 
         cx, cy = w // 2, h // 2
 
-    # draw histogram lower left corner
-    hist_img = generate_histogram_image(frame, width=512, height=240)
+    if histogram_on:
+        # draw histogram lower left corner
+        hist_img = generate_histogram_image(frame, width=512, height=240)
 
-    hist_h, hist_w = hist_img.shape[:2]
-    frame_h, frame_w = frame.shape[:2]
+        hist_h, hist_w = hist_img.shape[:2]
+        frame_h, frame_w = frame.shape[:2]
 
-    margin = 20
-    x0 = margin
-    y0 = frame_h - hist_h - margin
+        margin = 20
+        x0 = margin
+        y0 = frame_h - hist_h - margin
 
-    if x0 >= 0 and y0 >= 0 and x0 + hist_w <= frame_w and y0 + hist_h <= frame_h:
-        roi = frame[y0:y0 + hist_h, x0:x0 + hist_w].copy()
-        bg = np.full_like(roi, 20)
+        if x0 >= 0 and y0 >= 0 and x0 + hist_w <= frame_w and y0 + hist_h <= frame_h:
+            roi = frame[y0:y0 + hist_h, x0:x0 + hist_w].copy()
+            bg = np.full_like(roi, 20)
 
-        blended = cv2.addWeighted(roi, 0.35, bg, 0.65, 0)
-        frame[y0:y0 + hist_h, x0:x0 + hist_w] = blended
+            blended = cv2.addWeighted(roi, 0.35, bg, 0.65, 0)
+            frame[y0:y0 + hist_h, x0:x0 + hist_w] = blended
 
-        mask = hist_img > 0
-        frame[y0:y0 + hist_h, x0:x0 + hist_w][mask] = hist_img[mask]
+            mask = hist_img > 0
+            frame[y0:y0 + hist_h, x0:x0 + hist_w][mask] = hist_img[mask]
 
     # Draw horizontal & vertical lines
     cv2.line(frame, (0, cy), (w, cy), overlay_color, OVERLAY_THICKNESS)
@@ -549,6 +554,7 @@ def producer_loop():
             gamma = stretch_gamma
             sigma_k = stretch_sigma_k
             constellation_on = constellation_enabled
+            histogram_on = histogram_enabled
 
             if ae:
                 frame_period_sec = 1.0
@@ -594,7 +600,7 @@ def producer_loop():
                 time.sleep(2)
                 continue
 
-        jpeg = render_frame_for_zoom(frame, zoom, night_mode, polaris_hour, constellation_on)
+        jpeg = render_frame_for_zoom(frame, zoom, night_mode, polaris_hour, constellation_on, histogram_on)
         if jpeg is not None:
             publish_new_frame(jpeg)
 
@@ -852,6 +858,7 @@ class Handler(BaseHTTPRequestHandler):
                     global stretch_gamma
                     global stretch_sigma_k
                     global constellation_enabled
+                    global histogram_enabled
 
                     if "stack" in params:
                         live_stacking_enabled = params["stack"][0] == "1"
@@ -873,6 +880,9 @@ class Handler(BaseHTTPRequestHandler):
 
                     if "constellation" in params:
                         constellation_enabled = params["constellation"][0] == "1"
+
+                    if "histogram" in params:
+                        histogram_enabled = params["histogram"][0] == "1"
 
                 reset_live_stack()
                 save_settings()
@@ -949,7 +959,8 @@ class Handler(BaseHTTPRequestHandler):
                     "blackpoint_removal_enabled": blackpoint_removal_enabled,
                     "stretch_gamma": stretch_gamma,
                     "stretch_sigma_k": stretch_sigma_k,
-                    "constellation_enabled": constellation_enabled
+                    "constellation_enabled": constellation_enabled,
+                    "histogram_enabled": histogram_enabled
                 }
 
             payload = json.dumps(data).encode("utf-8")

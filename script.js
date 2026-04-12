@@ -24,6 +24,7 @@ let blackpointRemovalEnabled = true;
 let stretchGamma = 2.2;
 let stretchSigmaK = 1.8;
 let constellationEnabled = true;
+let histogramEnabled = true;
 
 function toggleLiveStacking() {
     liveStackingEnabled = document.getElementById("stackToggle").checked;
@@ -54,6 +55,12 @@ function toggleBlackpoint() {
 
 function toggleConstellation() {
     constellationEnabled = document.getElementById("constellationToggle").checked;
+    updateProcessingUI();
+    sendProcessingConfig();
+}
+
+function toggleHistogram() {
+    histogramEnabled = document.getElementById("histogramToggle").checked;
     updateProcessingUI();
     sendProcessingConfig();
 }
@@ -173,6 +180,7 @@ function updateProcessingUI() {
     document.getElementById("stretchToggle").checked = autoStretchEnabled;
     document.getElementById("blackpointToggle").checked = blackpointRemovalEnabled;
     document.getElementById("constellationToggle").checked = constellationEnabled;
+    document.getElementById("histogramToggle").checked = histogramEnabled;
     document.getElementById("gammaInput").value = stretchGamma.toFixed(1);
     document.getElementById("sigmaKInput").value = stretchSigmaK.toFixed(1);
 
@@ -310,6 +318,7 @@ function sendProcessingConfig() {
         + "&stretch=" + (autoStretchEnabled ? "1" : "0")
         + "&blackpoint=" + (blackpointRemovalEnabled ? "1" : "0")
         + "&constellation=" + (constellationEnabled ? "1" : "0")
+        + "&histogram=" + (histogramEnabled ? "1" : "0")
         + "&gamma=" + encodeURIComponent(stretchGamma.toFixed(2))
         + "&sigma_k=" + encodeURIComponent(stretchSigmaK.toFixed(2));
 
@@ -347,6 +356,7 @@ async function loadServerConfig() {
         stretchGamma = cfg.stretch_gamma ?? 2.2;
         stretchSigmaK = cfg.stretch_sigma_k ?? 1.8;
         constellationEnabled = cfg.constellation_enabled ?? true;
+        histogramEnabled = cfg.histogram_enabled ?? true;
         autoExposure = cfg.auto_exposure_enabled;
         exposureMs = Math.round(cfg.exposure_time_us / 1000);
         gainValue = cfg.analogue_gain;
@@ -355,6 +365,7 @@ async function loadServerConfig() {
         document.getElementById("afToggle").checked = autofocus;
         document.getElementById("aeToggle").checked = autoExposure;
         document.getElementById("constellationToggle").checked = constellationEnabled;
+        document.getElementById("histogramToggle").checked = histogramEnabled;
         document.getElementById("longitudeInput").value = longitudeDeg.toFixed(3);
         document.getElementById("exposureSlider").value = exposureMs;
         document.getElementById("gainSlider").value = gainValue;
