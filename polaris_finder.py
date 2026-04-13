@@ -681,6 +681,29 @@ class Handler(BaseHTTPRequestHandler):
         except (BrokenPipeError, ConnectionResetError):
             pass
 
+    def do_POST(self):
+        parsed = urlparse(self.path)
+
+        if parsed.path == "/restart_system":
+            self.send_response(204)
+            self.end_headers()
+            threading.Thread(
+                target=lambda: os.system("sudo systemctl restart polaris.service"),
+                daemon=True
+            ).start()
+
+        elif parsed.path == "/shutdown_system":
+            self.send_response(204)
+            self.end_headers()
+            threading.Thread(
+                target=lambda: os.system("sudo shutdown -h now"),
+                daemon=True
+            ).start()
+
+        else:
+            self.send_response(404)
+            self.end_headers()
+
     def do_GET(self):
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)

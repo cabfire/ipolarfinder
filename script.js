@@ -6,6 +6,8 @@ const MIN_FOCUS = 0.0;
 const MAX_FOCUS = 10.0;
 const MIN_LONGITUDE = -180.0;
 const MAX_LONGITUDE = 180.0;
+const restartBtn = document.getElementById("restartBtn");
+const shutdownBtn = document.getElementById("shutdownBtn");
 
 let eventSource = null;
 let lastFrameVersion = -1;
@@ -25,6 +27,28 @@ let stretchGamma = 2.2;
 let stretchSigmaK = 1.8;
 let constellationEnabled = true;
 let histogramEnabled = true;
+
+restartBtn.addEventListener("click", async () => {
+  const ok = confirm("Restart the Polaris service?");
+  if (!ok) return;
+
+  try {
+    await fetch("/restart_system", { method: "POST" });
+  } catch (err) {
+    console.error("restart failed", err);
+  }
+});
+
+shutdownBtn.addEventListener("click", async () => {
+  const ok = confirm("Shutdown the Raspberry Pi?");
+  if (!ok) return;
+
+  try {
+    await fetch("/shutdown_system", { method: "POST" });
+  } catch (err) {
+    console.error("shutdown failed", err);
+  }
+});
 
 function toggleLiveStacking() {
     liveStackingEnabled = document.getElementById("stackToggle").checked;
