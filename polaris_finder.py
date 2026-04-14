@@ -44,8 +44,8 @@ ZOOM_LEVELS = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 JPEG_QUALITY = 90
 # Lens distortion correction for constellation overlay only
 # Positive values push points outward toward the image edges
-DISTORTION_K1 = 0.18
-DISTORTION_K2 = 0.05
+DISTORTION_K1 = 0.10
+DISTORTION_K2 = 0.0
 
 # Shared Cache partagé between main image capture thread and HTTP server
 cache_lock = threading.Lock()
