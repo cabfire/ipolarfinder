@@ -39,16 +39,20 @@ OVERLAY_THICKNESS = 1
 NUM_TICKS = 72
 TICK_LEN = 6
 POLARIS_OFFSET_PX = (3600 * (90 - DEC_POLARIS)) / (206 * PIXEL_SIZE / CAM_FOCAL)
-# Zooms supportés
+# supported Zooms range
 ZOOM_LEVELS = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 JPEG_QUALITY = 90
+# Lens distortion correction for constellation overlay only
+# Positive values push points outward toward the image edges
+DISTORTION_K1 = 0.18
+DISTORTION_K2 = 0.05
 
-# Cache partagé entre le thread de prod et le serveur HTTP
+# Shared Cache partagé between main image capture thread and HTTP server
 cache_lock = threading.Lock()
 jpeg_cache = None        # {current jpeg_bytes}
-last_generated_utc = ""  # info debug éventuelle
+last_generated_utc = ""  # for debug information
 
-# SSE / synchro image
+# SSE / image synchro
 frame_condition = threading.Condition()
 frame_version = 0
 
@@ -77,7 +81,29 @@ stack_lock = threading.Lock()
 stack_acc = None
 
 # TOOLS Functions 
+def distort_overlay_point(x, y, cx, cy, width, height, k1=DISTORTION_K1, k2=DISTORTION_K2):
+    """
+    Apply a simple radial distortion to overlay points so they follow
+    the real optical distortion of the camera lens.
+    """
+    fx = width / 2.0
+    fy = height / 2.0
+
+    dx = (x - cx) / fx
+    dy = (y - cy) / fy
+
+    r2 = dx * dx + dy * dy
+    scale = 1.0 + k1 * r2 + k2 * r2 * r2
+
+    xd = dx * scale
+    yd = dy * scale
+
+    return int(round(cx + xd * fx)), int(round(cy + yd * fy))
+
 def star_to_xy(cx, cy, ra_h, dec_deg, lst_h, zoom_level:float):
+    """
+    tranform star (RA,DEC) position in (x,y) position
+    """
     hour_angle_h = (lst_h - ra_h) % 24.0
     angle = 2.0 * math.pi * (hour_angle_h / 24.0)
 
@@ -89,6 +115,8 @@ def star_to_xy(cx, cy, ra_h, dec_deg, lst_h, zoom_level:float):
     return x, y
 
 def draw_constellation(frame, constellation:str, cx, cy, lst_h, color=(180, 180, 180), thickness:int=1, zoom_level:float=1.0):
+    h, w = frame.shape[:2]
+
     points = {}
     for name, star in CONSTELLATIONS[constellation]['stars'].items():
         x, y = star_to_xy(
@@ -97,13 +125,15 @@ def draw_constellation(frame, constellation:str, cx, cy, lst_h, color=(180, 180,
             lst_h,
             zoom_level
         )
-        points[name] = (x, y)
 
-    h, w = frame.shape[:2]
+        # Apply lens-like radial distortion to overlay
+        x, y = distort_overlay_point(x, y, cx, cy, w, h)
+
+        points[name] = (x, y)
 
     def in_frame(pt):
         x, y = pt
-        return -50 <= x < w + 50 and -50 <= y < h + 50
+        return -80 <= x < w + 80 and -80 <= y < h + 80
 
     for a, b in CONSTELLATIONS[constellation]['lines']:
         p1 = points[a]
