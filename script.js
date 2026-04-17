@@ -26,6 +26,8 @@ let blackpointRemovalEnabled = true;
 let stretchGamma = 2.2;
 let stretchSigmaK = 1.8;
 let constellationEnabled = true;
+let distortionK1 = 0.10;
+let distortionK2 = 0.00;
 let histogramEnabled = true;
 
 restartBtn.addEventListener("click", async () => {
@@ -81,6 +83,24 @@ function toggleConstellation() {
     constellationEnabled = document.getElementById("constellationToggle").checked;
     updateProcessingUI();
     sendProcessingConfig();
+}
+
+function changeDistortionK1() {
+    const value = parseFloat(document.getElementById("distortionK1Slider").value);
+    if (!Number.isNaN(value)) {
+        distortionK1 = Math.max(0.0, Math.min(1.0, value));
+        updateProcessingUI();
+        sendProcessingConfig();
+    }
+}
+
+function changeDistortionK2() {
+    const value = parseFloat(document.getElementById("distortionK2Slider").value);
+    if (!Number.isNaN(value)) {
+        distortionK2 = Math.max(0.0, Math.min(1.0, value));
+        updateProcessingUI();
+        sendProcessingConfig();
+    }
 }
 
 function toggleHistogram() {
@@ -204,6 +224,13 @@ function updateProcessingUI() {
     document.getElementById("stretchToggle").checked = autoStretchEnabled;
     document.getElementById("blackpointToggle").checked = blackpointRemovalEnabled;
     document.getElementById("constellationToggle").checked = constellationEnabled;
+    document.getElementById("distortionK1Slider").value = distortionK1.toFixed(2);
+    document.getElementById("distortionK2Slider").value = distortionK2.toFixed(2);
+    document.getElementById("distortionK1Value").textContent = distortionK1.toFixed(2);
+    document.getElementById("distortionK2Value").textContent = distortionK2.toFixed(2);
+    document.getElementById("distortionK1Slider").disabled = !constellationEnabled;
+    document.getElementById("distortionK2Slider").disabled = !constellationEnabled;
+    document.getElementById("distortionControls").style.display = constellationEnabled ? "block" : "none";
     document.getElementById("histogramToggle").checked = histogramEnabled;
     document.getElementById("gammaInput").value = stretchGamma.toFixed(1);
     document.getElementById("sigmaKInput").value = stretchSigmaK.toFixed(1);
@@ -342,6 +369,8 @@ function sendProcessingConfig() {
         + "&stretch=" + (autoStretchEnabled ? "1" : "0")
         + "&blackpoint=" + (blackpointRemovalEnabled ? "1" : "0")
         + "&constellation=" + (constellationEnabled ? "1" : "0")
+        + "&distortion_k1=" + encodeURIComponent(distortionK1.toFixed(2))
+        + "&distortion_k2=" + encodeURIComponent(distortionK2.toFixed(2))
         + "&histogram=" + (histogramEnabled ? "1" : "0")
         + "&gamma=" + encodeURIComponent(stretchGamma.toFixed(2))
         + "&sigma_k=" + encodeURIComponent(stretchSigmaK.toFixed(2));
@@ -380,6 +409,8 @@ async function loadServerConfig() {
         stretchGamma = cfg.stretch_gamma ?? 2.2;
         stretchSigmaK = cfg.stretch_sigma_k ?? 1.8;
         constellationEnabled = cfg.constellation_enabled ?? true;
+        distortionK1 = cfg.distortion_k1 ?? 0.10;
+        distortionK2 = cfg.distortion_k2 ?? 0.00;
         histogramEnabled = cfg.histogram_enabled ?? true;
         autoExposure = cfg.auto_exposure_enabled;
         exposureMs = Math.round(cfg.exposure_time_us / 1000);
