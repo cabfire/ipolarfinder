@@ -94,6 +94,14 @@
                 </label>
             </div>
 
+            <div id="distortionControls" class="control-block">
+                <label for="distortionK1Slider">Distortion K1: <span id="distortionK1Value">0.10</span></label>
+                <input type="range" id="distortionK1Slider" min="0.00" max="1.00" step="0.01" value="0.10" oninput="changeDistortionK1()">
+
+                <label for="distortionK2Slider">Distortion K2: <span id="distortionK2Value">0.00</span></label>
+                <input type="range" id="distortionK2Slider" min="0.00" max="1.00" step="0.01" value="0.00" oninput="changeDistortionK2()">
+            </div>
+
             <div class="switch-row">
                 <span>Histogram</span>
                 <label class="switch">

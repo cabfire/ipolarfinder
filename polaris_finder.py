@@ -74,6 +74,8 @@ blackpoint_removal_enabled = True
 stretch_gamma = 2.2
 stretch_sigma_k = 1.8
 constellation_enabled = True
+distortion_k1 = DISTORTION_K1
+distortion_k2 = DISTORTION_K2
 histogram_enabled = True
 
 # live stacking
@@ -81,7 +83,7 @@ stack_lock = threading.Lock()
 stack_acc = None
 
 # TOOLS Functions 
-def distort_overlay_point(x, y, cx, cy, width, height, k1=DISTORTION_K1, k2=DISTORTION_K2):
+def distort_overlay_point(x, y, cx, cy, width, height, k1, k2):
     """
     Apply a simple radial distortion to overlay points so they follow
     the real optical distortion of the camera lens.
@@ -114,7 +116,7 @@ def star_to_xy(cx, cy, ra_h, dec_deg, lst_h, zoom_level:float):
     y = int(cy - radius_px * math.cos(angle))
     return x, y
 
-def draw_constellation(frame, constellation:str, cx, cy, lst_h, color=(180, 180, 180), thickness:int=1, zoom_level:float=1.0):
+def draw_constellation(frame, constellation:str, cx, cy, lst_h, color=(180, 180, 180), thickness:int=1, zoom_level:float=1.0, k1:float=DISTORTION_K1, k2:float=DISTORTION_K2):
     h, w = frame.shape[:2]
 
     points = {}
@@ -127,7 +129,7 @@ def draw_constellation(frame, constellation:str, cx, cy, lst_h, color=(180, 180,
         )
 
         # Apply lens-like radial distortion to overlay
-        x, y = distort_overlay_point(x, y, cx, cy, w, h)
+        x, y = distort_overlay_point(x, y, cx, cy, w, h, k1, k2)
 
         points[name] = (x, y)
 
@@ -170,6 +172,8 @@ def save_settings():
                 "stretch_gamma": stretch_gamma,
                 "stretch_sigma_k": stretch_sigma_k,
                 "constellation_enabled": constellation_enabled,
+                "distortion_k1": distortion_k1,
+                "distortion_k2": distortion_k2,
                 "histogram_enabled": histogram_enabled,
             }
 
@@ -196,6 +200,8 @@ def load_settings():
     global stretch_gamma
     global stretch_sigma_k
     global constellation_enabled
+    global distortion_k1
+    global distortion_k2
     global histogram_enabled
 
     if not os.path.exists(SETTINGS_FILE):
@@ -221,6 +227,8 @@ def load_settings():
             stretch_gamma = float(data.get("stretch_gamma", 2.2))
             stretch_sigma_k = float(data.get("stretch_sigma_k", 1.8))
             constellation_enabled = bool(data.get("constellation_enabled", True))
+            distortion_k1 = max(0.0, min(1.0, float(data.get("distortion_k1", DISTORTION_K1))))
+            distortion_k2 = max(0.0, min(1.0, float(data.get("distortion_k2", DISTORTION_K2))))
             histogram_enabled = bool(data.get("histogram_enabled", True))
 
     except Exception as e:
@@ -346,7 +354,7 @@ def draw_polar_clock(frame, cx, cy, radius,
         )
 
 
-def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour=0, constellation_on=True, histogram_on=True):
+def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour=0, constellation_on=True, histogram_on=True, k1=DISTORTION_K1, k2=DISTORTION_K2):
     """
     Rend une image finale pour un zoom donné à partir d'une image source déjà capturée.
     """
@@ -423,7 +431,9 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
                 lst_h,
                 color=overlay_color,
                 thickness=OVERLAY_THICKNESS,
-                zoom_level=zoom)
+                zoom_level=zoom,
+                k1=k1,
+                k2=k2)
 
     # Write UTC date/time and Polaris time
     utc_text = f' W: {(w/zoom):.0f} X H: {(h/zoom):.0f} - {utc_now.strftime("%Y-%m-%d %H:%M:%S UTC")}'
@@ -584,6 +594,8 @@ def producer_loop():
             gamma = stretch_gamma
             sigma_k = stretch_sigma_k
             constellation_on = constellation_enabled
+            k1 = distortion_k1
+            k2 = distortion_k2
             histogram_on = histogram_enabled
 
             if ae:
@@ -630,7 +642,7 @@ def producer_loop():
                 time.sleep(2)
                 continue
 
-        jpeg = render_frame_for_zoom(frame, zoom, night_mode, polaris_hour, constellation_on, histogram_on)
+        jpeg = render_frame_for_zoom(frame, zoom, night_mode, polaris_hour, constellation_on, histogram_on, k1, k2)
         if jpeg is not None:
             publish_new_frame(jpeg)
 
@@ -911,6 +923,8 @@ class Handler(BaseHTTPRequestHandler):
                     global stretch_gamma
                     global stretch_sigma_k
                     global constellation_enabled
+                    global distortion_k1
+                    global distortion_k2
                     global histogram_enabled
 
                     if "stack" in params:
@@ -933,6 +947,12 @@ class Handler(BaseHTTPRequestHandler):
 
                     if "constellation" in params:
                         constellation_enabled = params["constellation"][0] == "1"
+
+                    if "distortion_k1" in params:
+                        distortion_k1 = max(0.0, min(1.0, float(params["distortion_k1"][0])))
+
+                    if "distortion_k2" in params:
+                        distortion_k2 = max(0.0, min(1.0, float(params["distortion_k2"][0])))
 
                     if "histogram" in params:
                         histogram_enabled = params["histogram"][0] == "1"
@@ -1013,6 +1033,8 @@ class Handler(BaseHTTPRequestHandler):
                     "stretch_gamma": stretch_gamma,
                     "stretch_sigma_k": stretch_sigma_k,
                     "constellation_enabled": constellation_enabled,
+                    "distortion_k1": distortion_k1,
+                    "distortion_k2": distortion_k2,
                     "histogram_enabled": histogram_enabled
                 }
 
