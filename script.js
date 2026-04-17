@@ -88,7 +88,7 @@ function toggleConstellation() {
 function changeDistortionK1() {
     const value = parseFloat(document.getElementById("distortionK1Slider").value);
     if (!Number.isNaN(value)) {
-        distortionK1 = Math.max(0.0, Math.min(1.0, value));
+        distortionK1 = Math.max(-1.0, Math.min(1.0, value));
         updateProcessingUI();
         sendProcessingConfig();
     }
@@ -97,7 +97,7 @@ function changeDistortionK1() {
 function changeDistortionK2() {
     const value = parseFloat(document.getElementById("distortionK2Slider").value);
     if (!Number.isNaN(value)) {
-        distortionK2 = Math.max(0.0, Math.min(1.0, value));
+        distortionK2 = Math.max(-1.0, Math.min(1.0, value));
         updateProcessingUI();
         sendProcessingConfig();
     }

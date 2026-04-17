@@ -949,10 +949,10 @@ class Handler(BaseHTTPRequestHandler):
                         constellation_enabled = params["constellation"][0] == "1"
 
                     if "distortion_k1" in params:
-                        distortion_k1 = max(0.0, min(1.0, float(params["distortion_k1"][0])))
+                        distortion_k1 = max(-1.0, min(1.0, float(params["distortion_k1"][0])))
 
                     if "distortion_k2" in params:
-                        distortion_k2 = max(0.0, min(1.0, float(params["distortion_k2"][0])))
+                        distortion_k2 = max(-1.0, min(1.0, float(params["distortion_k2"][0])))
 
                     if "histogram" in params:
                         histogram_enabled = params["histogram"][0] == "1"
