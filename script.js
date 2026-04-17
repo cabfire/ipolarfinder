@@ -130,6 +130,7 @@ function changeSigmaK() {
 function updateAEControls() {
     document.getElementById("exposureSlider").disabled = autoExposure;
     document.getElementById("gainSlider").disabled = autoExposure;
+    document.getElementById("exposureGainControls").style.display = autoExposure ? "none" : "block";
 }
 
 function updateExposureLabel() {
@@ -221,6 +222,7 @@ function updateProcessingUI() {
     document.getElementById("stackAlphaSlider").value = liveStackingAlpha.toFixed(2);
     document.getElementById("stackAlphaValue").textContent = liveStackingAlpha.toFixed(2);
     document.getElementById("stackAlphaSlider").disabled = !liveStackingEnabled;
+    document.getElementById("stackAlphaControls").style.display = liveStackingEnabled ? "block" : "none";
     document.getElementById("stretchToggle").checked = autoStretchEnabled;
     document.getElementById("blackpointToggle").checked = blackpointRemovalEnabled;
     document.getElementById("constellationToggle").checked = constellationEnabled;

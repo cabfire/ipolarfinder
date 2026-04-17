@@ -43,7 +43,7 @@
                 </label>
             </div>
 
-            <div class="control-block">
+            <div class="control-block" id="stackAlphaControls">
                 <label for="stackAlphaSlider">Alpha stacking: <span id="stackAlphaValue">0.80</span></label>
                 <input type="range" id="stackAlphaSlider" min="0.10" max="0.95" step="0.05" value="0.80" oninput="changeStackAlpha()">
             </div>
@@ -118,7 +118,7 @@
                 </label>
             </div>
 
-            <div class="control-block">
+            <div class="control-block" id="exposureGainControls">
                 <label for="exposureSlider">Exposure: <span id="exposureValue">500</span> ms</label>
                 <input type="range" id="exposureSlider" min="50" max="10000" step="50" value="500" oninput="changeExposure()">
 
