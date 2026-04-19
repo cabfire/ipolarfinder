@@ -527,6 +527,9 @@ def generate_histogram_image(frame, width=256, height=150):
     # histogram calculation
     hist = cv2.calcHist([gray], [0], None, [256], [0, 256]).flatten()
 
+    # logarithmic display scaling
+    hist = np.log1p(hist)
+    
     # display normalisation
     hist = hist / max(hist.max(), 1)
 
