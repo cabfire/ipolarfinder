@@ -29,6 +29,7 @@ let constellationEnabled = true;
 let distortionK1 = 0.10;
 let distortionK2 = 0.00;
 let histogramEnabled = true;
+let histogramLogScaleEnabled = true;
 
 restartBtn.addEventListener("click", async () => {
   const ok = confirm("Restart the Polaris service?");
@@ -105,6 +106,12 @@ function changeDistortionK2() {
 
 function toggleHistogram() {
     histogramEnabled = document.getElementById("histogramToggle").checked;
+    updateProcessingUI();
+    sendProcessingConfig();
+}
+
+function toggleHistogramLogScale() {
+    histogramLogScaleEnabled = document.getElementById("histogramLogScaleToggle").checked;
     updateProcessingUI();
     sendProcessingConfig();
 }
@@ -234,6 +241,9 @@ function updateProcessingUI() {
     document.getElementById("distortionK2Slider").disabled = !constellationEnabled;
     document.getElementById("distortionControls").style.display = constellationEnabled ? "block" : "none";
     document.getElementById("histogramToggle").checked = histogramEnabled;
+    document.getElementById("histogramLogScaleToggle").checked = histogramLogScaleEnabled;
+    document.getElementById("histogramLogScaleToggle").disabled = !histogramEnabled;
+    document.getElementById("histogramLogScaleControls").style.display = histogramEnabled ? "flex" : "none";
     document.getElementById("gammaInput").value = stretchGamma.toFixed(1);
     document.getElementById("sigmaKInput").value = stretchSigmaK.toFixed(1);
 
@@ -374,6 +384,7 @@ function sendProcessingConfig() {
         + "&distortion_k1=" + encodeURIComponent(distortionK1.toFixed(2))
         + "&distortion_k2=" + encodeURIComponent(distortionK2.toFixed(2))
         + "&histogram=" + (histogramEnabled ? "1" : "0")
+        + "&histogram_log_scale=" + (histogramLogScaleEnabled ? "1" : "0")
         + "&gamma=" + encodeURIComponent(stretchGamma.toFixed(2))
         + "&sigma_k=" + encodeURIComponent(stretchSigmaK.toFixed(2));
 
@@ -414,6 +425,7 @@ async function loadServerConfig() {
         distortionK1 = cfg.distortion_k1 ?? 0.10;
         distortionK2 = cfg.distortion_k2 ?? 0.00;
         histogramEnabled = cfg.histogram_enabled ?? true;
+        histogramLogScaleEnabled = cfg.histogram_log_scale_enabled ?? true;
         autoExposure = cfg.auto_exposure_enabled;
         exposureMs = Math.round(cfg.exposure_time_us / 1000);
         gainValue = cfg.analogue_gain;
@@ -423,6 +435,7 @@ async function loadServerConfig() {
         document.getElementById("aeToggle").checked = autoExposure;
         document.getElementById("constellationToggle").checked = constellationEnabled;
         document.getElementById("histogramToggle").checked = histogramEnabled;
+        document.getElementById("histogramLogScaleToggle").checked = histogramLogScaleEnabled;
         document.getElementById("longitudeInput").value = longitudeDeg.toFixed(3);
         document.getElementById("exposureSlider").value = exposureMs;
         document.getElementById("gainSlider").value = gainValue;
