@@ -77,6 +77,7 @@ constellation_enabled = True
 distortion_k1 = DISTORTION_K1
 distortion_k2 = DISTORTION_K2
 histogram_enabled = True
+histogram_log_scale_enabled = True
 
 # live stacking
 stack_lock = threading.Lock()
@@ -175,6 +176,7 @@ def save_settings():
                 "distortion_k1": distortion_k1,
                 "distortion_k2": distortion_k2,
                 "histogram_enabled": histogram_enabled,
+                "histogram_log_scale_enabled": histogram_log_scale_enabled,
             }
 
         tmp_file = f"{SETTINGS_FILE}.{threading.get_ident()}.tmp"
@@ -203,6 +205,7 @@ def load_settings():
     global distortion_k1
     global distortion_k2
     global histogram_enabled
+    global histogram_log_scale_enabled
 
     if not os.path.exists(SETTINGS_FILE):
         return
@@ -230,6 +233,7 @@ def load_settings():
             distortion_k1 = max(0.0, min(1.0, float(data.get("distortion_k1", DISTORTION_K1))))
             distortion_k2 = max(0.0, min(1.0, float(data.get("distortion_k2", DISTORTION_K2))))
             histogram_enabled = bool(data.get("histogram_enabled", True))
+            histogram_log_scale_enabled = bool(data.get("histogram_log_scale_enabled", True))
 
     except Exception as e:
         log.error(f"Erreur chargement settings: {e}")
@@ -354,7 +358,7 @@ def draw_polar_clock(frame, cx, cy, radius,
         )
 
 
-def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour=0, constellation_on=True, histogram_on=True, k1=DISTORTION_K1, k2=DISTORTION_K2):
+def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour=0, constellation_on=True, histogram_on=True, histogram_log_scale_on=True, k1=DISTORTION_K1, k2=DISTORTION_K2):
     """
     Rend une image finale pour un zoom donné à partir d'une image source déjà capturée.
     """
@@ -381,7 +385,7 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
 
     if histogram_on:
         # draw histogram lower left corner
-        hist_img = generate_histogram_image(frame, width=512, height=240)
+        hist_img = generate_histogram_image(frame, width=512, height=240, log_scale=histogram_log_scale_on)
 
         hist_h, hist_w = hist_img.shape[:2]
         frame_h, frame_w = frame.shape[:2]
@@ -521,14 +525,15 @@ def live_stack(frame, alpha=0.8):
 
         return stack_acc.astype(np.uint8)
 
-def generate_histogram_image(frame, width=256, height=150):
+def generate_histogram_image(frame, width=256, height=150, log_scale=True):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # histogram calculation
     hist = cv2.calcHist([gray], [0], None, [256], [0, 256]).flatten()
 
     # logarithmic display scaling
-    hist = np.log1p(hist)
+    if log_scale:
+        hist = np.log1p(hist)
     
     # display normalisation
     hist = hist / max(hist.max(), 1)
@@ -600,6 +605,7 @@ def producer_loop():
             k1 = distortion_k1
             k2 = distortion_k2
             histogram_on = histogram_enabled
+            histogram_log_scale_on = histogram_log_scale_enabled
 
             if ae:
                 frame_period_sec = 1.0
@@ -645,7 +651,7 @@ def producer_loop():
                 time.sleep(2)
                 continue
 
-        jpeg = render_frame_for_zoom(frame, zoom, night_mode, polaris_hour, constellation_on, histogram_on, k1, k2)
+        jpeg = render_frame_for_zoom(frame, zoom, night_mode, polaris_hour, constellation_on, histogram_on, histogram_log_scale_on, k1, k2)
         if jpeg is not None:
             publish_new_frame(jpeg)
 
@@ -929,6 +935,7 @@ class Handler(BaseHTTPRequestHandler):
                     global distortion_k1
                     global distortion_k2
                     global histogram_enabled
+                    global histogram_log_scale_enabled
 
                     if "stack" in params:
                         live_stacking_enabled = params["stack"][0] == "1"
@@ -959,6 +966,9 @@ class Handler(BaseHTTPRequestHandler):
 
                     if "histogram" in params:
                         histogram_enabled = params["histogram"][0] == "1"
+
+                    if "histogram_log_scale" in params:
+                        histogram_log_scale_enabled = params["histogram_log_scale"][0] == "1"
 
                 reset_live_stack()
                 save_settings()
@@ -1038,7 +1048,8 @@ class Handler(BaseHTTPRequestHandler):
                     "constellation_enabled": constellation_enabled,
                     "distortion_k1": distortion_k1,
                     "distortion_k2": distortion_k2,
-                    "histogram_enabled": histogram_enabled
+                    "histogram_enabled": histogram_enabled,
+                    "histogram_log_scale_enabled": histogram_log_scale_enabled
                 }
 
             payload = json.dumps(data).encode("utf-8")
