@@ -233,7 +233,7 @@ def load_settings():
             distortion_k1 = max(0.0, min(1.0, float(data.get("distortion_k1", DISTORTION_K1))))
             distortion_k2 = max(0.0, min(1.0, float(data.get("distortion_k2", DISTORTION_K2))))
             histogram_enabled = bool(data.get("histogram_enabled", True))
-            histogram_log_scale_enabled = bool(data.get("histogram_log_scale_enabled", True))
+            histogram_log_scale_enabled = bool(data.get("histogram_log_scale_enabled", False))
 
     except Exception as e:
         log.error(f"Erreur chargement settings: {e}")
