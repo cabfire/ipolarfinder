@@ -148,6 +148,36 @@ def draw_constellation(frame, constellation:str, cx, cy, lst_h, color=(180, 180,
  #       if in_frame(pt):
  #           cv2.circle(frame, pt, 2, color, -1, cv2.LINE_AA)
 
+def draw_dashed_line(frame, pt1, pt2, color, thickness=1, dash_length=16, gap_length=10):
+    """
+    Draw a dashed line from pt1 to pt2.
+    """
+    x1, y1 = pt1
+    x2, y2 = pt2
+
+    dx = x2 - x1
+    dy = y2 - y1
+    line_length = math.hypot(dx, dy)
+    if line_length == 0:
+        return
+
+    step = dash_length + gap_length
+    vx = dx / line_length
+    vy = dy / line_length
+
+    distance = 0.0
+    while distance < line_length:
+        seg_start = distance
+        seg_end = min(distance + dash_length, line_length)
+
+        sx = int(round(x1 + vx * seg_start))
+        sy = int(round(y1 + vy * seg_start))
+        ex = int(round(x1 + vx * seg_end))
+        ey = int(round(y1 + vy * seg_end))
+
+        cv2.line(frame, (sx, sy), (ex, ey), color, thickness, cv2.LINE_AA)
+        distance += step
+
 def reset_live_stack():
     global stack_acc
 
@@ -407,6 +437,23 @@ def render_frame_for_zoom(source_frame, zoom=1.0, night_mode=False, polaris_hour
     # Draw horizontal & vertical lines
     cv2.line(frame, (0, cy), (w, cy), overlay_color, OVERLAY_THICKNESS)
     cv2.line(frame, (cx, 0), (cx, h), overlay_color, OVERLAY_THICKNESS)
+
+    # Draw diagonal dashed lines at +45° and -45°
+    line_extent = max(w, h)
+    draw_dashed_line(
+        frame,
+        (cx - line_extent, cy - line_extent),
+        (cx + line_extent, cy + line_extent),
+        overlay_color,
+        thickness=OVERLAY_THICKNESS,
+    )
+    draw_dashed_line(
+        frame,
+        (cx - line_extent, cy + line_extent),
+        (cx + line_extent, cy - line_extent),
+        overlay_color,
+        thickness=OVERLAY_THICKNESS,
+    )
 
     # Draw polar circle
     polaris_radius = int(round(POLARIS_OFFSET_PX * zoom, 0))
