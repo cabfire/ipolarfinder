@@ -142,8 +142,10 @@ http://<raspberry-pi-host-or-ip>:8000/
 
 ![EXO2 base assembly illustration](assets/exo2-base-assembly.png)
 
-> Add the provided exploded-view render at `assets/exo2-base-assembly.png` to display it in this section.
-
+See steps files for 3D printing:
+```text 
+steps/README.md
+```
 ---
 
 ## Notes
