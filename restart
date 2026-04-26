@@ -1,0 +1,4 @@
+#!/bin/bash
+touch /tmp/polaris_no_start_delay
+sudo systemctl restart polaris.service
+
