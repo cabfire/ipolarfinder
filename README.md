@@ -135,6 +135,15 @@ Then open:
 http://<raspberry-pi-host-or-ip>:8000/
 ```
 
+
+## Mechanical illustration
+
+### EXO2 base assembly
+
+![EXO2 base assembly illustration](assets/exo2-base-assembly.png)
+
+> Add the provided exploded-view render at `assets/exo2-base-assembly.png` to display it in this section.
+
 ---
 
 ## Notes
