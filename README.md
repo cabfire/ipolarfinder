@@ -52,8 +52,19 @@ The server runs on port `8000` and is intended for local-network use (for exampl
 ├── script.js            # UI logic and backend API calls
 ├── style.css            # Styling (normal and night modes)
 ├── test.py              # Local helper test script
-└── favicon.ico          # Browser icon
 ```
+
+---
+
+## CLI Commands
+
+The following CLI scripts are provided for managing the iPolarFinder service:
+
+- `log`: Follows the systemd journal logs for the polaris service in real-time.
+- `status`: Displays the current status of the polaris service.
+- `stop`: Stops the polaris service.
+- `restart`: Restarts the polaris service (with a flag to skip start delay).
+- `wifi_available`: Lists available Wi-Fi networks using nmcli.
 
 ---
 
